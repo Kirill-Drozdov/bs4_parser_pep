@@ -12,6 +12,7 @@ from configs import (
     configure_argument_parser,
     configure_logging
 )
+from exceptions import ParserFindTagException
 from outputs import control_output
 from utils import get_response, find_tag
 
@@ -122,21 +123,30 @@ def pep(session):
     # content = find_tag(soup, 'section', attrs={'id': 'pep-content'})
     category = find_tag(soup, 'section', attrs={'id': 'index-by-category'})
     tables = category.find_all('section')
-    table = tables[0]
-    tbody = find_tag(table, 'tbody')
-    tr_tag = tbody.find_all('tr')
-    for tr in tr_tag:
-        print()
-        print(tr.find('a'))
-        print()
-    # for table in tables:
-    #     print()
-    #     print(table)
-    #     print()
-    # pep_content = soup.find('section', attrs={'id': 'pep-content'})
-    # tables = soup.find_all('table', attrs={'class': 'table-wrapper'})
-    # for table in tables:
-    #     print(table)
+    # table = tables[0]
+    results = []
+    for table in tables:
+        try:
+            tbody = find_tag(table, 'tbody')
+            # print(tbody)
+            tr_tag = tbody.find_all('tr')
+            results += tr_tag
+
+        except ParserFindTagException:
+            continue
+    count = 0
+    output = [('Статус', 'Расшифровка')]
+    for tr in results:
+        # print()
+        abbr = tr.find('abbr')
+        status = abbr['title']
+        a_tag = tr.find('a')
+        title = a_tag.text
+        count += 1
+        output += (status, title)
+        # print(f'{status} --- {title}')
+        # print()
+    return output
 
 
 MODE_TO_FUNCTION = {
