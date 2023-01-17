@@ -113,10 +113,37 @@ def download(session):
     logging.info(f'Архив был загружен и сохранён: {archive_path}')
 
 
+def pep(session):
+    PEPS_MAIN_URL = 'https://peps.python.org/'
+    # session.cache.clear()
+    response = get_response(session, PEPS_MAIN_URL)
+    soup = BeautifulSoup(response.text, features='lxml')
+    # section = find_tag(soup, 'section', attrs={'id': 'pep-page-section'})
+    # content = find_tag(soup, 'section', attrs={'id': 'pep-content'})
+    category = find_tag(soup, 'section', attrs={'id': 'index-by-category'})
+    tables = category.find_all('section')
+    table = tables[0]
+    tbody = find_tag(table, 'tbody')
+    tr_tag = tbody.find_all('tr')
+    for tr in tr_tag:
+        print()
+        print(tr.find('a'))
+        print()
+    # for table in tables:
+    #     print()
+    #     print(table)
+    #     print()
+    # pep_content = soup.find('section', attrs={'id': 'pep-content'})
+    # tables = soup.find_all('table', attrs={'class': 'table-wrapper'})
+    # for table in tables:
+    #     print(table)
+
+
 MODE_TO_FUNCTION = {
     'whats-new': whats_new,
     'latest-versions': latest_versions,
     'download': download,
+    'pep': pep,
 }
 
 
