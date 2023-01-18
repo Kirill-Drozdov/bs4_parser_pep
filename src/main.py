@@ -116,36 +116,85 @@ def download(session):
 
 def pep(session):
     PEPS_MAIN_URL = 'https://peps.python.org/'
+    EXPECTED_STATUS = {
+        'A': ('Active', 'Accepted'),
+        'D': ('Deferred',),
+        'F': ('Final',),
+        'P': ('Provisional',),
+        'R': ('Rejected',),
+        'S': ('Superseded',),
+        'W': ('Withdrawn',),
+        '': ('Draft', 'Active'),
+    }
+
     # session.cache.clear()
     response = get_response(session, PEPS_MAIN_URL)
     soup = BeautifulSoup(response.text, features='lxml')
-    # section = find_tag(soup, 'section', attrs={'id': 'pep-page-section'})
-    # content = find_tag(soup, 'section', attrs={'id': 'pep-content'})
-    category = find_tag(soup, 'section', attrs={'id': 'index-by-category'})
-    tables = category.find_all('section')
-    # table = tables[0]
-    results = []
-    for table in tables:
-        try:
-            tbody = find_tag(table, 'tbody')
-            # print(tbody)
-            tr_tag = tbody.find_all('tr')
-            results += tr_tag
+    numerical_index = find_tag(
+        soup, 'section', attrs={'id': 'numerical-index'}
+    )
+    tbody_tag = find_tag(numerical_index, 'tbody')
+    tr_tags = tbody_tag.find_all('tr')
+    # category = find_tag(soup, 'section', attrs={'id': 'index-by-category'})
+    # tables = category.find_all('section')
+    # results = []
+    # for table in tables:
+    #     try:
+    #         tbody = find_tag(table, 'tbody')
+    #         # print(tbody)
+    #         tr_tag = tbody.find_all('tr')
+    #         results += tr_tag
 
-        except ParserFindTagException:
-            continue
+    #     except ParserFindTagException:
+    #         continue
+    status_count = {
+        'Active': 0,
+        'Accepted': 0,
+        'Deferred': 0,
+        'Final': 0,
+        'Provisional': 0,
+        'Rejected': 0,
+        'Superseded': 0,
+        'Withdrawn': 0,
+        'Draft': 0,
+    }
     count = 0
-    output = [('Статус', 'Расшифровка')]
-    for tr in results:
-        # print()
-        abbr = tr.find('abbr')
-        status = abbr['title']
+    output = [('Статус', 'Количество')]
+    for tr in tr_tags[:]:
+        preview_status = tr.find('abbr').text[1:]
+        parse_status = EXPECTED_STATUS[preview_status]
         a_tag = tr.find('a')
-        title = a_tag.text
+        link = a_tag['href']
+        pep_detail_url = urljoin(PEPS_MAIN_URL, link)
+        response = get_response(session, pep_detail_url)
+        soup = BeautifulSoup(response.text, features='lxml')
+        section_tag = find_tag(soup, 'section', attrs={'id': 'pep-content'})
+        dt_tag = section_tag.dl.find_all('dt')
+        for dt in dt_tag:
+            if dt.text == 'Status:':
+                status_detail = dt.next_sibling.next_sibling.text
+                break
         count += 1
-        output += (status, title)
-        # print(f'{status} --- {title}')
-        # print()
+
+        try:
+            status_count[status_detail] += 1
+        except KeyError:
+            logging.info(f'Указан несуществующий статус: {status_detail}')
+
+        if parse_status[0] != status_detail:
+            message = (
+                f'\nСтатусы не совпадают! - {pep_detail_url}\nСтатус в карточке: {status_detail}\n'
+                f'Ожидаемые статусы: {parse_status}'
+            )
+            if len(parse_status) < 2:
+                logging.info(message)
+            elif parse_status[1] != status_detail:
+                logging.info(message)
+
+    for status, count_status in status_count.items():
+        output.append((status, count_status))
+
+    output.append(('Total', count))
     return output
 
 
