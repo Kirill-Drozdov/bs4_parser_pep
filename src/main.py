@@ -21,8 +21,12 @@ def whats_new(session):
     response = get_response(session, whats_new_url)
     soup = BeautifulSoup(response.text, features='lxml')
 
-    main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
-    div_with_ul = find_tag(main_div, 'div', attrs={'class': 'toctree-wrapper'})
+    main_div = find_tag(
+        soup, 'section', attrs={'id': 'what-s-new-in-python'}
+    )
+    div_with_ul = find_tag(
+        main_div, 'div', attrs={'class': 'toctree-wrapper'}
+    )
 
     sections_by_python = div_with_ul.find_all(
         'li', attrs={'class': 'toctree-l1'}
@@ -145,7 +149,8 @@ def pep(session):
 
         if parse_status[0] != status_detail:
             message = (
-                f'\nСтатусы не совпадают! - {pep_detail_url}\nСтатус в карточке: {status_detail}\n'
+                f'\nСтатусы не совпадают! - {pep_detail_url}\n'
+                f'Статус в карточке: {status_detail}\n'
                 f'Ожидаемые статусы: {parse_status}'
             )
             if len(parse_status) < 2:
