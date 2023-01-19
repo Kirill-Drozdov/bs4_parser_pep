@@ -112,7 +112,7 @@ def pep(session):
     tbody_tag = find_tag(numerical_index, 'tbody')
     tr_tags = tbody_tag.find_all('tr')
 
-    status_count = {
+    status_count_total = {
         'Active': 0,
         'Accepted': 0,
         'Deferred': 0,
@@ -143,7 +143,7 @@ def pep(session):
                 break
 
         try:
-            status_count[status_detail] += 1
+            status_count_total[status_detail] += 1
         except KeyError:
             logging.info(f'Указан несуществующий статус: {status_detail}')
 
@@ -158,7 +158,7 @@ def pep(session):
             elif parse_status[1] != status_detail:
                 logging.info(message)
 
-    for status, count_status in status_count.items():
+    for status, count_status in status_count_total.items():
         output.append((status, count_status))
 
     output.append(('Total', count))
