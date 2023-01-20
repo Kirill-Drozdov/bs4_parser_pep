@@ -134,10 +134,7 @@ def pep(session):
     for tr in tr_tags:
         count += 1
         preview_status = find_tag(tr, 'abbr').text[1:]
-        try:
-            parse_status = EXPECTED_STATUS[preview_status]
-        except KeyError:
-            logging.info(f'Указан несуществующий статус: {preview_status}')
+        parse_status = EXPECTED_STATUS[preview_status]
         a_tag = find_tag(tr, 'a')
         link = a_tag['href']
         pep_detail_url = urljoin(PEPS_MAIN_URL, link)
