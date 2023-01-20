@@ -40,7 +40,6 @@ def whats_new(session):
         'li', attrs={'class': 'toctree-l1'}
     )
 
-    # RESULTS_WHATS_NEW = [('Ссылка на статью', 'Заголовок', 'Редактор, Автор')]
     for section in tqdm(sections_by_python):
         version_a_tag = find_tag(section, 'a')
         version_link = urljoin(whats_new_url, version_a_tag['href'])
@@ -70,7 +69,6 @@ def latest_versions(session):
             break
         raise Exception('Ничего не нашлось')
 
-    # RESULTS_LATEST_VERSIONS = [('Ссылка на документацию', 'Версия', 'Статус')]
     pattern = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
 
     for a_tag in tqdm(a_tags):
@@ -133,11 +131,13 @@ def pep(session):
         'Draft': 0,
     }
     count = 0
-    # RESULTS_PEP = [('Статус', 'Количество')]
     for tr in tr_tags:
         count += 1
         preview_status = find_tag(tr, 'abbr').text[1:]
-        parse_status = EXPECTED_STATUS[preview_status]
+        try:
+            parse_status = EXPECTED_STATUS[preview_status]
+        except KeyError:
+            logging.info(f'Указан несуществующий статус: {preview_status}')
         a_tag = find_tag(tr, 'a')
         link = a_tag['href']
         pep_detail_url = urljoin(PEPS_MAIN_URL, link)
