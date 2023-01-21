@@ -17,7 +17,7 @@ cd bs4_parser_pep
 Cоздать и активировать виртуальное окружение:
 
 ```
-python3 -m venv env
+py -3.9 -m venv env
 ```
 
 ```
