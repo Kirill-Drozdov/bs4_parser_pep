@@ -49,15 +49,19 @@ tbody_tag = numerical_index.find('tbody')
 
 tr_tags = tbody_tag.find_all('tr')
 
-for tr in tr_tags[:1]:
+for tr in tr_tags:
     # preview_status = tr.find('abbr').text
     # print(preview_status)
     td_tags = tr.find_all('td')
-    status = td_tags[0].text
-    number = td_tags[1].text
-    title = td_tags[2].text
-    authors = td_tags[3].text
-    print(status)
-    print(number)
-    print(title)
-    print(authors)
+    tr_status = td_tags[0].text
+    tr_number = td_tags[1].text
+    tr_title = td_tags[2].text
+    tr_authors = td_tags[3].text
+    pep = Pep(
+        type_status=tr_status,
+        number=tr_number,
+        title=tr_title,
+        authors=tr_authors
+    )
+    session.add(pep)
+    session.commit()
